@@ -1,0 +1,83 @@
+/* stok.css - Sadece stok.html için geçerli stiller (Önceki, basit arayüze yakın) */
+
+.miktar-islem-kutusu {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.miktar-islem-kutusu h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.2em;
+    text-align: center; /* Başlıkları ortala */
+}
+
+.miktar-islem-kutusu input[type="number"] {
+    width: calc(100% - 22px); /* Padding ve border için ayarlama */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.miktar-islem-kutusu button {
+    width: 100%; /* Butonları tam genişlik yap */
+    padding: 10px 15px;
+    background-color: #4a148c; /* Mor buton rengi */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.miktar-islem-kutusu button:hover {
+    background-color: #4a148c;
+}
+
+.current-stock {
+    text-align: center;
+    margin-top: 30px;
+    padding: 15px;
+    border: 2px dashed #4a148c;
+    border-radius: 10px;
+    background-color: #e7f3ff;
+}
+
+.current-stock h2 {
+    color: #0056b3;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.current-stock p {
+    margin: 5px 0;
+    font-size: 1.1em;
+    color: #555;
+}
+
+.current-stock h3 {
+    margin-top: 15px;
+    color: #4a148c;
+    font-size: 1.3em;
+}
+
+.current-stock span { /* Stok miktarı sayıları */
+    font-weight: bold;
+    color: #333;
+}
+
+
+#geriDonBtn {
+    background-color: #6c757d; /* Gri buton */
+}
+
+#geriDonBtn:hover {
+    background-color: #5a6268;
+}

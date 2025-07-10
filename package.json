@@ -1,0 +1,27 @@
+{
+  "name": "depolamaproje",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codebyecem/ilk-proje-depo-sistemi.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/codebyecem/ilk-proje-depo-sistemi/issues"
+  },
+  "homepage": "https://github.com/codebyecem/ilk-proje-depo-sistemi#readme",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "express": "^5.1.0",
+    "mysql": "^2.18.1"
+  }
+}

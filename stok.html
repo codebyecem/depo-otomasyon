@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Stok Miktar İşlemleri</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Stok Miktar İşlemleri</h1>
+        
+        <div class="result-panel">
+            <h2><span id="urunBilgisi"></span></h2>
+        </div>
+
+        <div class="miktar-islem-kutusu">
+            <h2>Üretime Verilecek Miktar</h2>
+            <input type="number" id="uretmeMiktar" placeholder="Miktar Giriniz">
+            <button id="uretmeVerBtn">Üretime Ver</button>
+        </div>
+
+        <div class="miktar-islem-kutusu">
+            <h2>Stoka Eklenecek Miktar</h2>
+            <input type="number" id="eklemeMiktar" placeholder="Miktar Giriniz">
+            <button id="stokaEkleBtn">Stoka Ekle</button>
+        </div>
+
+        <div class="result-panel">
+            <p>Mevcut Stok: <span id="mevcutStok">Yükleniyor...</span></p>
+            <p>Toplam Alan: <span id="toplamAlan">Hesaplanıyor...</span> m²</p>
+
+        </div>
+
+        <div class="button-container">
+            <button id="geriDonBtn">Geri Dön</button>
+        </div>
+    </div>
+
+    
+    <script src="stok_app.js"></script>
+</body>
+</html>
+

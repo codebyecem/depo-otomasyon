@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Depo İşlemleri</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Dört aylık stok ortalaması</h1>
+
+        <div class="select-box">
+            <label for="kaliteSec">Kalite Grubu Seçiniz</label>
+            <select id="kaliteSec">
+                <option value="">Seçiniz</option>
+                </select>
+        </div>
+
+        <div class="select-box">
+            <label for="markaSec">Marka Seçiniz</label>
+            <select id="markaSec" disabled>
+                <option value="">Önce kalite seçin</option>
+            </select>
+        </div>
+
+        <div class="select-box">
+            <label for="olcuSec">EN (Ölçü) Seçiniz</label>
+            <select id="olcuSec" disabled>
+                <option value="">Önce marka seçin</option>
+            </select>
+        </div>
+
+        <div class="button-container">
+            <button id="onaylaBtn">Hesapla</button>
+        </div>
+        
+        <div class="button-container">
+            <button id="geriDonBtn">Geri Dön</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

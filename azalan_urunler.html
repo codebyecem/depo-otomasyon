@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Azalan Ürünler</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .urun-kutu {
+            background-color: #fff;
+            border-left: 6px solid red;
+            padding: 16px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .urun-kutu span {
+            font-weight: bold;
+        }
+
+        .unlem {
+            font-size: 24px;
+            color: red;
+            margin-right: 10px;
+        }
+
+        /* 🔍 Arama kutusu stili */
+        #aramaInput {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 15px;
+            width: 60%;
+            font-size: 16px;
+            border: 1px solid #aaa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>❗ Azalan Ürünler</h1>
+
+        <!-- 🔍 Arama kutusu -->
+        <input type="text" id="aramaInput" placeholder="Ürün ara...">
+
+        <div id="urunListesi">
+            <p>Yükleniyor...</p>
+        </div>
+
+        <div class="button-container">
+            <button onclick="window.location.href='index.html'">Geri Dön</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let tumUrunler = [];
+
+            fetch("http://localhost:8000/stoklar")
+                .then(res => res.json())
+                .then(data => {
+                    tumUrunler = data.filter(urun => Number(urun.mevcut_stok) < 1000);
+                    guncelleListe(tumUrunler);
+                })
+                .catch(err => {
+                    document.getElementById("urunListesi").innerHTML = "<p>Veriler yüklenemedi.</p>";
+                    console.error(err);
+                });
+
+            // 🔁 Listeyi yeniden çizen fonksiyon
+            function guncelleListe(urunler) {
+                const listeDiv = document.getElementById("urunListesi");
+                listeDiv.innerHTML = "";
+
+                if (urunler.length === 0) {
+                    listeDiv.innerHTML = "<p>Uygun ürün bulunamadı. 😕</p>";
+                    return;
+                }
+
+                urunler.forEach(urun => {
+                    const urunDiv = document.createElement("div");
+                    urunDiv.className = "urun-kutu";
+                    urunDiv.innerHTML = `
+                        <div>
+                            <span>${urun.kalite} - ${urun.marka} - EN: ${urun.en}</span><br>
+                            <small>Kalan Miktar: ${urun.mevcut_stok} mt</small>
+                        </div>
+                        <div class="unlem">❗</div>
+                    `;
+                    listeDiv.appendChild(urunDiv);
+                });
+            }
+
+            // 🔍 Arama işlemi
+            document.getElementById("aramaInput").addEventListener("input", function () {
+                const arama = this.value.toLowerCase();
+                const filtreli = tumUrunler.filter(urun =>
+  (
+    `${(urun.kalite || "").toLowerCase()} ${(urun.marka || "").toLowerCase()} ${(urun.en || "").toString().toLowerCase()}`
+  ).includes(arama)
+);
+
+                guncelleListe(filtreli);
+            });
+        });
+    </script>
+</body>
+</html>
