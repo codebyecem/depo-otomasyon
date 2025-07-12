@@ -137,6 +137,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Geri Dön butonu
     geriDonBtn.addEventListener('click', () => {
-        window.location.href = 'index.html'; // Ana sayfaya dön
+        window.location.href = 'anasayfa.html'; // Ana sayfaya dön
     });
 });

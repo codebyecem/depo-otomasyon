@@ -1,105 +1,86 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const kaliteSec = document.getElementById("kaliteSec");
-    const markaSec = document.getElementById("markaSec");
-    const olcuSec = document.getElementById("olcuSec");
-    const onaylaBtn = document.getElementById("onaylaBtn");
-    const geriDonBtn = document.getElementById("geriDonBtn");
+  const kaliteSec = document.getElementById("kaliteSec");
+  const markaSec  = document.getElementById("markaSec");
+  const olcuSec   = document.getElementById("olcuSec");
+  const onaylaBtn = document.getElementById("onaylaBtn");
 
-    const kaliteChoices = new Choices(kaliteSec, {
-        searchEnabled: true,
-        itemSelectText: '',
-        shouldSort: false,
-        removeItemButton: false
+  let stokVerisi = [];
+
+  // Sayfa adını al:
+  const sayfaAdi = window.location.pathname.split("/").pop();
+  // eğer depo.html ise depo_stoklar, diğer türlü stoklar
+  const kaynak = sayfaAdi === "depo.html"
+    ? "depo_stoklar"
+    : "stoklar";
+
+  // İlk başta marka ve ölçü dropdown’larını disabled yap
+  markaSec.disabled = true;
+  olcuSec.disabled  = true;
+
+  // Verileri çek ve kalite dropdown’unu doldur
+  fetch(`http://localhost:8000/${kaynak}`)
+    .then(res => res.json())
+    .then(data => {
+      stokVerisi = data;
+      const kaliteListesi = [...new Set(data.map(i => i.kalite))];
+      kaliteListesi.forEach(k => {
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.textContent = k;
+        kaliteSec.append(opt);
+      });
+    })
+    .catch(err => {
+      console.error("❌ Veri yüklenemedi:", err);
+      alert("Veri yüklenemedi!");
     });
 
-    const markaChoices = new Choices(markaSec, {
-        searchEnabled: true,
-        itemSelectText: '',
-        shouldSort: false,
-        removeItemButton: false
+  kaliteSec.addEventListener("change", () => {
+    // marka ve ölçü dropdown’larını sıfırla
+    markaSec.innerHTML = `<option value="">Seçiniz</option>`;
+    olcuSec.innerHTML  = `<option value="">Seçiniz</option>`;
+    markaSec.disabled = false;
+    olcuSec.disabled  = true;
+
+    const secKalite = kaliteSec.value;
+    const markalar = stokVerisi
+      .filter(i => i.kalite === secKalite)
+      .map(i => i.marka);
+    [...new Set(markalar)].forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m;
+      opt.textContent = m;
+      markaSec.append(opt);
     });
+  });
 
-    const olcuChoices = new Choices(olcuSec, {
-        searchEnabled: true,
-        itemSelectText: '',
-        shouldSort: false,
-        removeItemButton: false
+  markaSec.addEventListener("change", () => {
+    olcuSec.innerHTML = `<option value="">Seçiniz</option>`;
+    olcuSec.disabled  = false;
+
+    const secKalite = kaliteSec.value;
+    const secMarka   = markaSec.value;
+
+    const olculer = stokVerisi
+      .filter(i => i.kalite===secKalite && i.marka===secMarka)
+      .map(i => i.en);
+    [...new Set(olculer)].forEach(e => {
+      const opt = document.createElement("option");
+      opt.value = e;
+      opt.textContent = e;
+      olcuSec.append(opt);
     });
+  });
 
-    let urunVerisi = [];
-
-    fetch("http://localhost:8000/stoklar")
-        .then(res => res.json())
-        .then(data => {
-            urunVerisi = data;
-
-            // Kalite verilerini yükle
-            const kaliteListesi = [...new Set(data.map(item => item.kalite))];
-            const kaliteOptions = [{ value: "", label: "Seçiniz", selected: true, disabled: true }]
-                .concat(kaliteListesi.map(k => ({ value: k, label: k })));
-            kaliteChoices.setChoices(kaliteOptions, 'value', 'label', true);
-        })
-        .catch(err => {
-            alert("Veri yüklenemedi!");
-            console.error(err);
-        });
-
-    kaliteSec.addEventListener("change", () => {
-        const secilenKalite = kaliteSec.value;
-
-        markaChoices.clearChoices();
-        markaChoices.disable();
-        olcuChoices.clearChoices();
-        olcuChoices.disable();
-
-        if (!secilenKalite) return;
-
-        const markaListesi = [...new Set(urunVerisi
-            .filter(item => item.kalite === secilenKalite)
-            .map(item => item.marka))];
-
-        const markaOptions = [{ value: "", label: "Seçiniz", selected: true, disabled: true }]
-            .concat(markaListesi.map(m => ({ value: m, label: m })));
-
-        markaChoices.setChoices(markaOptions, 'value', 'label', true);
-        markaChoices.enable();
-    });
-
-    markaSec.addEventListener("change", () => {
-        const secilenKalite = kaliteSec.value;
-        const secilenMarka = markaSec.value;
-
-        olcuChoices.clearChoices();
-        olcuChoices.disable();
-
-        if (!secilenKalite || !secilenMarka) return;
-
-        const enListesi = [...new Set(urunVerisi
-            .filter(item => item.kalite === secilenKalite && item.marka === secilenMarka)
-            .map(item => item.en))];
-
-        const enOptions = [{ value: "", label: "Seçiniz", selected: true, disabled: true }]
-            .concat(enListesi.map(en => ({ value: en, label: en })));
-
-        olcuChoices.setChoices(enOptions, 'value', 'label', true);
-        olcuChoices.enable();
-    });
-
-    onaylaBtn.addEventListener("click", () => {
-        const kalite = kaliteSec.value;
-        const marka = markaSec.value;
-        const en = olcuSec.value;
-
-        if (!kalite || !marka || !en) {
-            alert("Lütfen tüm seçimleri yapınız.");
-            return;
-        }
-
-        window.location.href = `stok.html?kalite=${kalite}&marka=${marka}&en=${en}`;
-    });
-
-    geriDonBtn.addEventListener('click', () => {
-        window.location.href = 'index.html';
-    });
+  onaylaBtn.addEventListener("click", () => {
+    const kalite = kaliteSec.value;
+    const marka  = markaSec.value;
+    const en     = olcuSec.value;
+    if (!kalite||!marka||!en) {
+      return alert("Lütfen tüm alanları seçin.");
+    }
+    // stok.html’e kaynak bilgisini de query string’te ilet
+    const hedef = `stok.html?kalite=${encodeURIComponent(kalite)}&marka=${encodeURIComponent(marka)}&en=${encodeURIComponent(en)}&kaynak=${kaynak==="depo_stoklar"?"depo":"fabrika"}`;
+    window.location.href = hedef;
+  });
 });
-

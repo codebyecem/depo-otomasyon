@@ -1,70 +1,13 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const urunBilgisiSpan = document.getElementById('urunBilgisi');
-    const uretmeMiktarInput = document.getElementById('uretmeMiktar');
-    const uretmeVerBtn = document.getElementById('uretmeVerBtn');
-    const eklemeMiktarInput = document.getElementById('eklemeMiktar');
-    const stokaEkleBtn = document.getElementById('stokaEkleBtn');
-    const mevcutStokSpan = document.getElementById('mevcutStok');
-    const geriDonBtn = document.getElementById('geriDonBtn');
-
-    let currentStok = 0;
-    let secilenUrunId = null;
-
-    // Veritabanı PATCH isteği
-    function guncelleStokVeritabani(yeniStok, miktar, islemTipi) {
-        if (!secilenUrunId) return;
-
-        fetch(`http://localhost:8000/stoklar/${secilenUrunId}`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ mevcut_stok: yeniStok })
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error("Stok güncellenemedi!");
-            }
-            return res.json();
-        })
-        .then(data => {
-            currentStok = yeniStok;
-            mevcutStokSpan.textContent = `${currentStok} mt`;
-            hesaplaToplamAlan(); // stok değiştiğinde metrekareyi tekrar hesapla
-
-            if (islemTipi === 'azalt') {
-                uretmeMiktarInput.value = '';
-                alert(`${miktar} mt üretime verildi. Yeni stok: ${currentStok}`);
-            } else {
-                eklemeMiktarInput.value = '';
-                alert(`${miktar} mt stoka eklendi. Yeni stok: ${currentStok}`);
-            }
-        })
-        .catch(err => {
-            console.error("Veritabanı güncelleme hatası:", err);
-            alert("Stok güncellenirken bir hata oluştu. Lütfen tekrar deneyin.");
-        });
-    }
-
-    // URL'den ürün bilgilerini al
+ document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const kalite = urlParams.get('kalite');
     const marka = urlParams.get('marka');
     const en = urlParams.get('en');
+    const kaynak = urlParams.get('kaynak');
+    const endpoint = kaynak === 'depo' ? 'depo_stoklar' : 'stoklar';
 
-    if (!kalite || !marka || !en) {
-        urunBilgisiSpan.textContent = "Ürün Bilgisi Bulunamadı";
-        alert("Ürün bilgileri eksik. Lütfen Depo İşlemleri sayfasından seçim yapınız.");
-        geriDonBtn.addEventListener('click', () => {
-            window.location.href = 'depo.html';
-        });
-        return;
-    }
-
-    urunBilgisiSpan.textContent = `${kalite} - ${marka} - ${en}`;
-
-    // Ürünü veritabanından çek
-    fetch('http://localhost:8000/stoklar')
+    // Veriyi çek
+    fetch(`http://localhost:8000/${endpoint}`)
         .then(res => res.json())
         .then(data => {
             const urun = data.find(item =>
@@ -79,58 +22,59 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            secilenUrunId = urun.id;
-            currentStok = parseInt(urun.mevcut_stok);
-            mevcutStokSpan.textContent = `${currentStok} mt`;
-
-            hesaplaToplamAlan(); // stok verisi geldiğinde metrekareyi hesapla
+            seciliUrun = urun;
+            mevcutStokSpan.textContent = urun.mevcut_stok;
+            toplamAlanSpan.textContent = ((parseFloat(urun.en) / 1000) * urun.mevcut_stok).toFixed(2);
         })
         .catch(err => {
             console.error("Veri çekme hatası:", err);
-            mevcutStokSpan.textContent = "Hata!";
+            alert("Veri çekilirken hata oluştu.");
         });
 
-    // Üretime Ver butonu
-    uretmeVerBtn.addEventListener('click', () => {
-        const miktar = parseInt(uretmeMiktarInput.value);
-        if (isNaN(miktar) || miktar <= 0) {
-            alert('Lütfen geçerli bir miktar giriniz.');
-            return;
-        }
-        if (currentStok < miktar) {
-            alert('Mevcut stok yetersiz!');
-            return;
-        }
-        guncelleStokVeritabani(currentStok - miktar, miktar, 'azalt');
+    // Üretime Ver
+    uretmeVerBtn.addEventListener("click", () => {
+        const miktar = parseFloat(uretmeMiktarInput.value);
+        if (!seciliUrun || isNaN(miktar) || miktar <= 0) return alert("Geçerli bir miktar giriniz.");
+
+        const yeniStok = seciliUrun.mevcut_stok - miktar;
+        if (yeniStok < 0) return alert("Yetersiz stok!");
+
+        guncelleStok(yeniStok, `✔️ ${miktar} mt üretime verildi.`);
     });
 
-    // Stoka Ekle butonu
-    stokaEkleBtn.addEventListener('click', () => {
-        const miktar = parseInt(eklemeMiktarInput.value);
-        if (isNaN(miktar) || miktar <= 0) {
-            alert('Lütfen geçerli bir miktar giriniz.');
-            return;
-        }
-        guncelleStokVeritabani(currentStok + miktar, miktar, 'ekle');
+    // Stoka Ekle
+    stokaEkleBtn.addEventListener("click", () => {
+        const miktar = parseFloat(eklemeMiktarInput.value);
+        if (!seciliUrun || isNaN(miktar) || miktar <= 0) return alert("Geçerli bir miktar giriniz.");
+
+        const yeniStok = seciliUrun.mevcut_stok + miktar;
+        guncelleStok(yeniStok, `➕ ${miktar} mt stoka eklendi.`);
     });
 
-    // Geri Dön butonu
-    geriDonBtn.addEventListener('click', () => {
-        window.location.href = 'depo.html';
+    // Geri Dön
+    geriDonBtn.addEventListener("click", () => {
+        window.location.href = kaynak === "depo" ? "depo.html" : "fabrika.html";
     });
 
-    // ✅ Toplam Alan Hesaplama Fonksiyonu
-    function hesaplaToplamAlan() {
-        const toplamAlanSpan = document.getElementById('toplamAlan');
-        const enSayisi = Number(en);
-        const stokMt = currentStok;
-
-        if (!isNaN(enSayisi) && !isNaN(stokMt)) {
-            const alan = (enSayisi / 1000) * stokMt;
-            toplamAlanSpan.textContent = alan.toLocaleString('tr-TR', { maximumFractionDigits: 2 });
-        } else {
-            toplamAlanSpan.textContent = "Hesaplanamadı";
-        }
+    // Veritabanına güncelleme isteği gönder
+    function guncelleStok(yeniStok, mesaj) {
+        fetch(`http://localhost:8000/${endpoint}/${seciliUrun.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mevcut_stok: yeniStok })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(mesaj);
+            mevcutStokSpan.textContent = yeniStok;
+            toplamAlanSpan.textContent = ((parseFloat(seciliUrun.en) / 1000) * yeniStok).toFixed(2);
+            seciliUrun.mevcut_stok = yeniStok;
+        })
+        .catch(err => {
+            console.error("Stok güncelleme hatası:", err);
+            alert("Stok güncellenemedi.");
+        });
     }
 });
+
 

@@ -28,7 +28,6 @@
         <div class="result-panel">
             <p>Mevcut Stok: <span id="mevcutStok">Yükleniyor...</span></p>
             <p>Toplam Alan: <span id="toplamAlan">Hesaplanıyor...</span> m²</p>
-
         </div>
 
         <div class="button-container">
@@ -36,8 +35,90 @@
         </div>
     </div>
 
-    
-    <script src="stok_app.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const kalite = urlParams.get('kalite');
+        const marka = urlParams.get('marka');
+        const en = urlParams.get('en');
+        const kaynak = urlParams.get('kaynak') || "fabrika"; // varsayılan fabrika
+
+        const urunBilgisiSpan = document.getElementById('urunBilgisi');
+        const mevcutStokSpan = document.getElementById('mevcutStok');
+        const toplamAlanSpan = document.getElementById('toplamAlan');
+        const uretmeMiktarInput = document.getElementById('uretmeMiktar');
+        const eklemeMiktarInput = document.getElementById('eklemeMiktar');
+
+        const uretmeVerBtn = document.getElementById('uretmeVerBtn');
+        const stokaEkleBtn = document.getElementById('stokaEkleBtn');
+        const geriDonBtn = document.getElementById('geriDonBtn');
+
+        let seciliUrun = null;
+
+        urunBilgisiSpan.textContent = `${kalite} - ${marka} - ${en} (${kaynak})`;
+
+        const endpoint = kaynak === "depo" ? "depo_stoklar" : "stoklar";
+
+        fetch(`http://localhost:8000/${endpoint}`)
+            .then(res => res.json())
+            .then(data => {
+                const urun = data.find(item =>
+                    item.kalite === kalite &&
+                    item.marka === marka &&
+                    item.en.toString() === en.toString()
+                );
+
+                if (!urun) {
+                    alert("Ürün bulunamadı!");
+                    return;
+                }
+
+                seciliUrun = urun;
+                mevcutStokSpan.textContent = urun.mevcut_stok;
+                toplamAlanSpan.textContent = ((parseFloat(urun.mevcut_stok) || 0) * parseFloat(urun.en)).toFixed(2);
+            });
+
+        uretmeVerBtn.addEventListener("click", () => {
+            const miktar = parseFloat(uretmeMiktarInput.value);
+            if (!seciliUrun || isNaN(miktar)) return alert("Geçerli miktar gir!");
+
+            const yeniStok = seciliUrun.mevcut_stok - miktar;
+            if (yeniStok < 0) return alert("Stok yetersiz!");
+
+            guncelleStok(yeniStok);
+        });
+
+        stokaEkleBtn.addEventListener("click", () => {
+            const miktar = parseFloat(eklemeMiktarInput.value);
+            if (!seciliUrun || isNaN(miktar)) return alert("Geçerli miktar gir!");
+
+            const yeniStok = seciliUrun.mevcut_stok + miktar;
+            guncelleStok(yeniStok);
+        });
+
+        function guncelleStok(yeniMiktar) {
+            const endpoint = kaynak === "depo" ? "depo_stoklar" : "stoklar";
+
+            fetch(`http://localhost:8000/${endpoint}/${seciliUrun.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mevcut_stok: yeniMiktar })
+            })
+            .then(res => res.json())
+            .then(response => {
+                alert(response.mesaj || "Stok güncellendi.");
+                mevcutStokSpan.textContent = yeniMiktar;
+                toplamAlanSpan.textContent = (yeniMiktar * seciliUrun.en).toFixed(2);
+                seciliUrun.mevcut_stok = yeniMiktar;
+            })
+            .catch(err => {
+                alert("Hata oluştu!");
+                console.error(err);
+            });
+        }
+
+        geriDonBtn.addEventListener("click", () => {
+            window.location.href = kaynak === "depo" ? "depo.html" : "fabrika.html";
+        });
+    </script>
 </body>
 </html>
-
