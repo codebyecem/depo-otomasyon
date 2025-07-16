@@ -27,7 +27,7 @@
             margin-right: 10px;
         }
 
-        /* 🔍 Arama kutusu stili */
+        
         #aramaInput {
             display: block;
             margin: 20px auto;
@@ -43,7 +43,7 @@
     <div class="container">
         <h1>❗ Azalan Ürünler</h1>
 
-        <!-- 🔍 Arama kutusu -->
+        
         <input type="text" id="aramaInput" placeholder="Ürün ara...">
 
         <div id="urunListesi">
@@ -70,7 +70,7 @@
                     console.error(err);
                 });
 
-            // 🔁 Listeyi yeniden çizen fonksiyon
+            
             function guncelleListe(urunler) {
                 const listeDiv = document.getElementById("urunListesi");
                 listeDiv.innerHTML = "";
@@ -94,7 +94,7 @@
                 });
             }
 
-            // 🔍 Arama işlemi
+            
             document.getElementById("aramaInput").addEventListener("input", function () {
                 const arama = this.value.toLowerCase();
                 const filtreli = tumUrunler.filter(urun =>

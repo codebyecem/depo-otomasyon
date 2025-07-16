@@ -6,18 +6,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   let stokVerisi = [];
 
-  // Sayfa adını al:
   const sayfaAdi = window.location.pathname.split("/").pop();
-  // eğer depo.html ise depo_stoklar, diğer türlü stoklar
   const kaynak = sayfaAdi === "depo.html"
     ? "depo_stoklar"
     : "stoklar";
 
-  // İlk başta marka ve ölçü dropdown’larını disabled yap
   markaSec.disabled = true;
   olcuSec.disabled  = true;
 
-  // Verileri çek ve kalite dropdown’unu doldur
   fetch(`http://localhost:8000/${kaynak}`)
     .then(res => res.json())
     .then(data => {
@@ -36,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
   kaliteSec.addEventListener("change", () => {
-    // marka ve ölçü dropdown’larını sıfırla
     markaSec.innerHTML = `<option value="">Seçiniz</option>`;
     olcuSec.innerHTML  = `<option value="">Seçiniz</option>`;
     markaSec.disabled = false;
@@ -79,7 +74,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!kalite||!marka||!en) {
       return alert("Lütfen tüm alanları seçin.");
     }
-    // stok.html’e kaynak bilgisini de query string’te ilet
     const hedef = `stok.html?kalite=${encodeURIComponent(kalite)}&marka=${encodeURIComponent(marka)}&en=${encodeURIComponent(en)}&kaynak=${kaynak==="depo_stoklar"?"depo":"fabrika"}`;
     window.location.href = hedef;
   });
